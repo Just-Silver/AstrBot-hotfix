@@ -30,3 +30,9 @@ AstrBot-hotfix/
 ```
 
 新增补丁时：建目录 → 放补丁文件与 README → 在本表登记一行。
+
+## 许可证
+
+本仓库是 [AstrBot](https://github.com/AstrBotDevs/AstrBot) 的衍生作品，补丁文件基于其源码修改，
+因此与上游一致，采用 **GNU Affero General Public License v3.0 or later**（AGPL-3.0-or-later），
+全文见 [`LICENSE`](LICENSE)。

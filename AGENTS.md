@@ -58,6 +58,7 @@ astrbot/core/utils/quoted_message/chain_parser.py
 - 保持文件编码与原文件一致：UTF-8 无 BOM、LF 换行
 - 改动范围尽量收敛：只动目标逻辑，不顺手改格式或无关代码
 - 新增补丁后在根 `README.md` 的清单表登记一行
+- 许可证必须与上游保持一致（AGPL-3.0-or-later）：补丁是 AstrBot 源码的衍生文件，不得改成 MIT、Apache 等宽松协议
 
 ## 维护流程
 
