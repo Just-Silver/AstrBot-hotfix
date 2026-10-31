@@ -43,7 +43,7 @@ gh api "repos/AstrBotDevs/AstrBot/contents/astrbot/core/utils/quoted_message/cha
 
 | 补丁文件 | 覆盖的上游路径（容器内） |
 |---|---|
-| `forward-content/chain_parser.py` | `/AstrBot/astrbot/core/utils/quoted_message/chain_parser.py` |
+| `patches/forward-content/chain_parser.py` | `/AstrBot/astrbot/core/utils/quoted_message/chain_parser.py` |
 
 对应的上游源码路径（相对仓库根）：
 

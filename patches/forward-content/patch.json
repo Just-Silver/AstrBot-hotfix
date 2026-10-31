@@ -1,0 +1,13 @@
+{
+  "name": "forward-content",
+  "description": "引用合并转发时读不到转发正文",
+  "file": "chain_parser.py",
+  "astrbot": ">=4.29,<5",
+  "targets": [
+    {
+      "module": "astrbot.core.utils.quoted_message.extractor",
+      "attribute": "OneBotPayloadParser",
+      "source": "OneBotPayloadParser"
+    }
+  ]
+}

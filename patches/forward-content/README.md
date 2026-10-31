@@ -61,8 +61,10 @@
 ├── AstrBot/
 ├── NapCatQQ/
 ├── AstrBot-hotfix/
-│   └── forward-content/
-│       └── chain_parser.py
+│   ├── hotfix.json
+│   └── patches/
+│       └── forward-content/
+│           └── chain_parser.py
 └── docker-compose.yaml
 ```
 
@@ -71,12 +73,12 @@
 ```yaml
     volumes:
       - ./AstrBot/data:/AstrBot/data          # 原有，保持不动
-      - ./AstrBot-hotfix/forward-content/chain_parser.py:/AstrBot/astrbot/core/utils/quoted_message/chain_parser.py:ro
+      - ./AstrBot-hotfix/patches/forward-content/chain_parser.py:/AstrBot/astrbot/core/utils/quoted_message/chain_parser.py:ro
 ```
 
 面板表单式挂载：
 
-- 主机路径：`共享文件夹/Docker/AstrBot/AstrBot-hotfix/forward-content/chain_parser.py`
+- 主机路径：`共享文件夹/Docker/AstrBot/AstrBot-hotfix/patches/forward-content/chain_parser.py`
 - 容器路径：`/AstrBot/astrbot/core/utils/quoted_message/chain_parser.py`
 - 只读：开
 

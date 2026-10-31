@@ -8,7 +8,7 @@
 
 | 目录 | 修复内容 | 基于版本 |
 |---|---|---|
-| [`forward-content`](forward-content/README.md) | 引用合并转发时读不到转发正文 | v4.29.4 |
+| [`patches/forward-content`](patches/forward-content/README.md) | 引用合并转发时读不到转发正文 | v4.29.4 |
 
 ## 通用约束
 
@@ -17,19 +17,31 @@
 - 升级 AstrBot 后必须核对补丁是否仍适用（各补丁目录内附检查脚本）
 - 官方修复后应及时移除对应挂载，避免旧文件覆盖新逻辑
 
+## 通过插件远程加载
+
+本仓库同时是 `astrbot_plugin_agent_toolkit` 的远程热补丁来源，可以不挂载文件、重启容器，直接在插件的「热补丁」视图里开启。
+
+- 根 `hotfix.json` 声明清单格式
+- 每个补丁目录内的 `patch.json` 声明文件、适用 AstrBot 版本与注入点
+- 插件只扫描 `patches/` 下一层目录，补丁默认关闭，需要用户手动开启
+
+清单字段的完整定义见插件仓库的 [`astrbot-hotfix-repository.md`](https://github.com/Just-Silver/astrbot_plugin_agent_toolkit/blob/main/docs/research/astrbot-hotfix-repository.md)。
+
 ## 目录约定
 
 ```
 AstrBot-hotfix/
-├── README.md                 ← 本索引
-├── forward-content/          ← 补丁一
-│   ├── chain_parser.py
-│   ├── check-upstream.ps1
-│   └── README.md
-└── <下一个补丁>/
+├── README.md
+├── hotfix.json               ← 插件远程加载的根清单
+└── patches/
+    └── forward-content/      ← 补丁一
+        ├── patch.json        ← 补丁清单
+        ├── chain_parser.py
+        ├── check-upstream.ps1
+        └── README.md
 ```
 
-新增补丁时：建目录 → 放补丁文件与 README → 在本表登记一行。
+新增补丁时：在 `patches/` 下建目录 → 放补丁文件、`patch.json` 与 README → 在本表登记一行。
 
 ## 许可证
 
