@@ -11,16 +11,16 @@
 | | 位置 |
 |---|---|
 | 官方仓库（`upstream`） | https://github.com/AstrBotDevs/AstrBot |
-| 本地源码 | `E:\Code\Projects\Applications\AstrBot\AstrBot`（git clone，分支 `master`） |
+| 本地源码 | `E:\Code\Projects\Applications\AstrBot\upstream\AstrBot`（git clone，分支 `master`） |
 | 本地源码的 `origin` | https://github.com/Just-Silver/AstrBot（个人 fork，不含私改，仅做镜像） |
-| 当前补丁基线 | **v4.29.3**（2026-10-24） |
+| 当前补丁基线 | **v4.29.4**（2026-10-31） |
 
 ## 开发前同步（强制）
 
 任何改动开始前（新增/修改补丁、排查问题、生成对比文件），**必须先同步一次本地源码**，不允许在落后基线上动手。
 
 ```powershell
-cd E:\Code\Projects\Applications\AstrBot\AstrBot
+cd E:\Code\Projects\Applications\AstrBot\upstream\AstrBot
 git fetch --all --tags --prune
 git switch master
 git merge --ff-only upstream/master   # 合入官方最新
@@ -36,7 +36,7 @@ git log --oneline -1
 拉取指定 tag 的原始文件用于对比（示例）：
 
 ```bash
-gh api "repos/AstrBotDevs/AstrBot/contents/astrbot/core/utils/quoted_message/chain_parser.py?ref=v4.29.3" --jq '.content'
+gh api "repos/AstrBotDevs/AstrBot/contents/astrbot/core/utils/quoted_message/chain_parser.py?ref=v4.29.4" --jq '.content'
 ```
 
 ## 补丁与上游文件的对应关系

@@ -4,6 +4,7 @@ import json
 import re
 from typing import Any, TypedDict
 
+from astrbot import logger
 from astrbot.core.message.components import (
     At,
     AtAll,
@@ -18,7 +19,6 @@ from astrbot.core.message.components import (
 )
 from astrbot.core.platform.astr_message_event import AstrMessageEvent
 from astrbot.core.utils.string_utils import normalize_and_dedupe_strings
-from astrbot import logger
 
 from .image_refs import looks_like_image_file_name
 from .settings import SETTINGS, QuotedMessageParserSettings
@@ -286,6 +286,15 @@ def _node_sender_label(sender: Any, *, show_id: bool = True) -> str:
     return str(name)
 
 
+def _escape_xml_attr(value: str) -> str:
+    return (
+        value.replace("&", "&amp;")
+        .replace("<", "&lt;")
+        .replace(">", "&gt;")
+        .replace('"', "&quot;")
+    )
+
+
 def _node_preview_text(raw_content: Any, limit: int = 80) -> str:
     chain = raw_content if isinstance(raw_content, list) else []
     parts: list[str] = []
@@ -310,6 +319,7 @@ def _parse_onebot_segments(
     depth: int = 0,
     quoted_map: dict[str, str] | None = None,
     settings: QuotedMessageParserSettings = SETTINGS,
+    in_forward: bool = False,
 ) -> ParsedOneBotPayload:
     text_parts: list[str] = []
     forward_ids: list[str] = []
@@ -391,16 +401,23 @@ def _parse_onebot_segments(
                     )
                 )
                 if nested_text:
-                    if depth == 0:
-                        text_parts.append(nested_text)
+                    if not in_forward:
+                        # 前后补换行，避免和同一消息链里的文本段粘成一串
+                        text_parts.append(f"\n{nested_text}\n")
                     else:
-                        prefix = "  " * depth
+                        # 每层只加一级相对缩进；若按绝对 depth 加，父层会
+                        # 在子层已有缩进上再次叠加，越深越歪。
+                        prefix = "  "
                         body = "\n".join(
                             f"{prefix}{line}"
                             for line in nested_text.splitlines()
                             if line.strip()
                         )
-                        text_parts.append(f"[转发了以下聊天记录]\n{body}")
+                        # 用开闭标签而不是缩进表达边界：纯缩进会被模型当成
+                        # 同一段对话继续读，分不清转发到哪条结束。
+                        text_parts.append(f"<转发>\n{body}\n{prefix}</转发>")
+                else:
+                    text_parts.append('<转发 内容已省略="层级过深"/>')
                 if nested_forward_ids:
                     forward_ids.extend(nested_forward_ids)
                 if nested_images:
@@ -467,9 +484,7 @@ def _extract_text_forward_ids_and_images_from_forward_nodes(
         if not isinstance(node, dict):
             continue
 
-        sender_label = _node_sender_label(
-            node.get("sender"), show_id=show_sender_id
-        )
+        sender_label = _node_sender_label(node.get("sender"), show_id=show_sender_id)
 
         raw_content = node.get("message") or node.get("content") or []
         chain: list[Any] = []
@@ -488,7 +503,11 @@ def _extract_text_forward_ids_and_images_from_forward_nodes(
                     chain = [{"type": "text", "data": {"text": raw_content}}]
 
         parsed_segments = _parse_onebot_segments(
-            chain, depth=depth, settings=settings, quoted_map=quoted_map
+            chain,
+            depth=depth,
+            settings=settings,
+            quoted_map=quoted_map,
+            in_forward=True,
         )
         node_text = parsed_segments["text"]
         node_forward_ids = parsed_segments["forward_ids"]
@@ -525,12 +544,14 @@ def _parse_onebot_get_msg_payload(
         )
         if text and has_forward:
             origin = _node_sender_label(data.get("sender"))
-            text = f"[由 {origin} 发起的合并转发]\n{text}"
+            text = (
+                f'<合并转发 发起者="{_escape_xml_attr(origin)}">\n'
+                f"{text.strip()}\n"
+                f"</合并转发>"
+            )
             # 便于现场核对展开结果；只在引用到转发时触发，需将日志级别调到 DEBUG
             logger.debug("[转发展开] 字符数=%d\n%s", len(text), text)
-        return _build_parsed_payload(
-            text, parsed["forward_ids"], parsed["image_refs"]
-        )
+        return _build_parsed_payload(text, parsed["forward_ids"], parsed["image_refs"])
 
     text: str | None = None
     if isinstance(segments, str) and segments.strip():

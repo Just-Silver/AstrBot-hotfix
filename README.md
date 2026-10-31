@@ -8,7 +8,7 @@
 
 | 目录 | 修复内容 | 基于版本 |
 |---|---|---|
-| [`forward-content`](forward-content/README.md) | 引用合并转发时读不到转发正文 | v4.29.3 |
+| [`forward-content`](forward-content/README.md) | 引用合并转发时读不到转发正文 | v4.29.4 |
 
 ## 通用约束
 
