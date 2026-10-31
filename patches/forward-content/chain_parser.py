@@ -1,7 +1,10 @@
 from __future__ import annotations
 
+import hashlib
 import json
 import re
+import time
+from collections import OrderedDict
 from typing import Any, TypedDict
 
 from astrbot import logger
@@ -527,6 +530,28 @@ def _extract_text_forward_ids_and_images_from_forward_nodes(
     )
 
 
+def _consume_forward_log_slot(text: str) -> bool:
+    """Return True when the same expanded payload was not logged moments ago.
+
+    AstrBot resolves quoted text and quoted images separately, so the same
+    message reaches this parser twice; logging both copies is pure noise.
+    """
+
+    digest = hashlib.sha1(text.encode("utf-8")).hexdigest()
+    now = time.monotonic()
+    last = _RECENT_FORWARD_LOGS.get(digest)
+    _RECENT_FORWARD_LOGS[digest] = now
+    _RECENT_FORWARD_LOGS.move_to_end(digest)
+    while len(_RECENT_FORWARD_LOGS) > _FORWARD_LOG_LIMIT:
+        _RECENT_FORWARD_LOGS.popitem(last=False)
+    return last is None or now - last > _FORWARD_LOG_TTL
+
+
+_RECENT_FORWARD_LOGS: OrderedDict[str, float] = OrderedDict()
+_FORWARD_LOG_TTL = 5.0
+_FORWARD_LOG_LIMIT = 8
+
+
 def _parse_onebot_get_msg_payload(
     payload: dict[str, Any],
     *,
@@ -549,8 +574,10 @@ def _parse_onebot_get_msg_payload(
                 f"{text.strip()}\n"
                 f"</合并转发>"
             )
-            # 便于现场核对展开结果；只在引用到转发时触发，需将日志级别调到 DEBUG
-            logger.debug("[转发展开] 字符数=%d\n%s", len(text), text)
+            # 便于现场核对展开结果；只在引用到转发时触发，需将日志级别调到 DEBUG。
+            # 文本与图片两次解析会命中同一内容，这里只记录真正注入给 agent 的那一份。
+            if _consume_forward_log_slot(text):
+                logger.debug("[转发展开] 字符数=%d\n%s", len(text), text)
         return _build_parsed_payload(text, parsed["forward_ids"], parsed["image_refs"])
 
     text: str | None = None
