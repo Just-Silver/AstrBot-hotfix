@@ -1,5 +1,11 @@
 {
   "name": "forward-content",
+  "version": "1.0.0",
+  "changelog": [
+    "嵌套转发用 <转发> 标签表达层级",
+    "同一条转发只记录一次展开日志",
+    "引用、语音、表情、@ 与文件段补齐渲染"
+  ],
   "description": "引用合并转发时读不到转发正文",
   "file": "chain_parser.py",
   "astrbot": ">=4.29,<5",
