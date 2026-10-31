@@ -2,7 +2,7 @@
 
 <!-- 职责：热补丁索引与通用约束；不写：单个补丁的实现细节（见各自目录）。 -->
 
-对官方 AstrBot 镜像做**单文件挂载式**修复，不改镜像、不动业务数据。
+以**单文件挂载**或**插件远程加载**两种方式修复官方 AstrBot 镜像里的缺陷，不改镜像、不动业务数据。
 
 ## 补丁清单
 
@@ -19,11 +19,12 @@
 
 ## 通过插件远程加载
 
-本仓库同时是 `astrbot_plugin_agent_toolkit` 的远程热补丁来源，可以不挂载文件、重启容器，直接在插件的「热补丁」视图里开启。
+本仓库同时是 `astrbot_plugin_agent_toolkit` 的远程热补丁来源，可以不挂载文件、重启容器，直接在插件的「工具台 → 模块 → 热补丁」里开启。
 
 - 根 `hotfix.json` 声明清单格式
-- 每个补丁目录内的 `patch.json` 声明文件、适用 AstrBot 版本与注入点
+- 每个补丁目录内的 `patch.json` 声明文件、适用 AstrBot 版本、版本号与注入点
 - 插件只扫描 `patches/` 下一层目录，补丁默认关闭，需要用户手动开启
+- 补丁有新版本时不会自动替换，由用户在界面里逐个确认更新
 
 清单字段的完整定义见插件仓库的 [`astrbot-hotfix-repository.md`](https://github.com/Just-Silver/astrbot_plugin_agent_toolkit/blob/main/docs/research/astrbot-hotfix-repository.md)。
 
@@ -41,7 +42,7 @@ AstrBot-hotfix/
         └── README.md
 ```
 
-新增补丁时：在 `patches/` 下建目录 → 放补丁文件、`patch.json` 与 README → 在本表登记一行。
+新增补丁的完整流程（目录、`patch.json` 模板、版本规则、自检清单）见 [`AGENTS.md`](AGENTS.md#新增补丁流程)，不要凭印象直接建目录。
 
 ## 许可证
 
